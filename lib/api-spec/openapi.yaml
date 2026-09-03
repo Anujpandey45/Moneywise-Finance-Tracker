@@ -10,6 +10,10 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: finance
+    description: Personal finance tracking
+  - name: assistant
+    description: Financial assistant summaries
 paths:
   /healthz:
     get:
@@ -24,6 +28,128 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /transactions:
+    get:
+      operationId: listTransactions
+      tags: [finance]
+      summary: List financial transactions
+      parameters:
+        - name: month
+          in: query
+          required: false
+          schema:
+            type: string
+            pattern: "^[0-9]{4}-[0-9]{2}$"
+        - name: type
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [income, expense]
+      responses:
+        "200":
+          description: Transactions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Transaction"
+    post:
+      operationId: createTransaction
+      tags: [finance]
+      summary: Create a financial transaction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TransactionInput"
+      responses:
+        "201":
+          description: Created transaction
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Transaction"
+  /transactions/{id}:
+    patch:
+      operationId: updateTransaction
+      tags: [finance]
+      summary: Update a financial transaction
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: number
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TransactionUpdate"
+      responses:
+        "200":
+          description: Updated transaction
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Transaction"
+        "404":
+          description: Transaction not found
+    delete:
+      operationId: deleteTransaction
+      tags: [finance]
+      summary: Delete a financial transaction
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: number
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Transaction not found
+  /dashboard:
+    get:
+      operationId: getDashboard
+      tags: [finance]
+      summary: Get finance dashboard aggregates
+      parameters:
+        - name: month
+          in: query
+          required: false
+          schema:
+            type: string
+            pattern: "^[0-9]{4}-[0-9]{2}$"
+      responses:
+        "200":
+          description: Dashboard summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Dashboard"
+  /assistant/summary:
+    post:
+      operationId: createAssistantSummary
+      tags: [assistant]
+      summary: Generate a financial summary
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AssistantSummaryInput"
+      responses:
+        "200":
+          description: Assistant response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AssistantSummary"
 components:
   schemas:
     HealthStatus:
@@ -33,4 +159,141 @@ components:
           type: string
       required:
         - status
+    Transaction:
+      type: object
+      required: [id, type, title, category, amount, date, note]
+      properties:
+        id:
+          type: number
+        type:
+          type: string
+          enum: [income, expense]
+        title:
+          type: string
+        category:
+          type: string
+        amount:
+          type: number
+        date:
+          type: string
+          format: date
+        note:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+          format: date-time
+    TransactionInput:
+      type: object
+      required: [type, title, category, amount, date]
+      properties:
+        type:
+          type: string
+          enum: [income, expense]
+        title:
+          type: string
+          minLength: 1
+        category:
+          type: string
+          minLength: 1
+        amount:
+          type: number
+          exclusiveMinimum: 0
+        date:
+          type: string
+          format: date
+        note:
+          type: string
+    TransactionUpdate:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [income, expense]
+        title:
+          type: string
+          minLength: 1
+        category:
+          type: string
+          minLength: 1
+        amount:
+          type: number
+          exclusiveMinimum: 0
+        date:
+          type: string
+          format: date
+        note:
+          type: string
+    CategoryTotal:
+      type: object
+      required: [category, amount, percentage]
+      properties:
+        category:
+          type: string
+        amount:
+          type: number
+        percentage:
+          type: number
+    MonthlyTotal:
+      type: object
+      required: [month, income, expenses, profit]
+      properties:
+        month:
+          type: string
+        income:
+          type: number
+        expenses:
+          type: number
+        profit:
+          type: number
+    Dashboard:
+      type: object
+      required: [month, totalIncome, totalExpenses, netProfit, incomeChange, expenseChange, savingsRate, topExpenseCategory, expenseBreakdown, monthlyTrend, recentTransactions]
+      properties:
+        month:
+          type: string
+        totalIncome:
+          type: number
+        totalExpenses:
+          type: number
+        netProfit:
+          type: number
+        incomeChange:
+          type: number
+        expenseChange:
+          type: number
+        savingsRate:
+          type: number
+        topExpenseCategory:
+          type: string
+        expenseBreakdown:
+          type: array
+          items:
+            $ref: "#/components/schemas/CategoryTotal"
+        monthlyTrend:
+          type: array
+          items:
+            $ref: "#/components/schemas/MonthlyTotal"
+        recentTransactions:
+          type: array
+          items:
+            $ref: "#/components/schemas/Transaction"
+    AssistantSummaryInput:
+      type: object
+      required: [month]
+      properties:
+        month:
+          type: string
+          pattern: "^[0-9]{4}-[0-9]{2}$"
+        question:
+          type: string
+    AssistantSummary:
+      type: object
+      required: [message, highlights]
+      properties:
+        message:
+          type: string
+        highlights:
+          type: array
+          items:
+            type: string
 

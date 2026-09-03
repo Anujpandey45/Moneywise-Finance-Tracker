@@ -1,0 +1,42 @@
+import { Link } from 'wouter';
+import { ArrowDownRight, ArrowRight, Check, CircleDollarSign, Leaf, LineChart, ShieldCheck, Sparkles } from 'lucide-react';
+import { BrandMark, PublicNav } from '@/components/moneywise-shell';
+
+export default function Landing() {
+  return (
+    <div className="paper-noise min-h-[100dvh] overflow-hidden bg-background">
+      <PublicNav />
+      <main>
+        <section className="relative mx-auto max-w-7xl px-5 pb-20 pt-16 md:px-8 md:pb-32 md:pt-24">
+          <div className="money-grid absolute inset-x-0 top-0 h-[590px] opacity-60" />
+          <div className="relative grid items-center gap-14 lg:grid-cols-[1.02fr_.98fr]">
+            <div className="max-w-2xl">
+              <div className="animate-rise-in inline-flex items-center gap-2 rounded-full border border-border bg-card/75 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground"><span className="h-1.5 w-1.5 rounded-full bg-[hsl(var(--accent))]" /> Financial clarity, without the fuss</div>
+              <h1 className="animate-rise-in delay-1 display-font mt-7 max-w-[680px] text-[clamp(3.5rem,8vw,7.5rem)] font-semibold leading-[.9] tracking-[-.075em] text-foreground">Know where your <em className="font-medium text-primary">money</em> is taking you.</h1>
+              <p className="animate-rise-in delay-2 mt-8 max-w-lg text-lg leading-relaxed text-muted-foreground md:text-xl">Moneywise turns the monthly blur into a calm, honest picture — so you can make your next move with both feet on the ground.</p>
+              <div className="animate-rise-in delay-3 mt-9 flex flex-wrap items-center gap-4"><Link href="/sign-up" className="group flex items-center gap-3 rounded-xl bg-primary px-5 py-3.5 text-sm font-bold text-primary-foreground shadow-lg shadow-primary/10 transition-transform hover:-translate-y-1" data-testid="link-hero-start">Open your workspace <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" /></Link><Link href="/sign-in" className="rounded-xl px-3 py-3.5 text-sm font-bold text-foreground transition-colors hover:text-primary" data-testid="link-hero-sign-in">I already have an account</Link></div>
+            </div>
+            <div className="relative mx-auto w-full max-w-[500px] lg:mr-0">
+              <div className="absolute -right-10 -top-8 h-36 w-36 rounded-full bg-[hsl(var(--accent)/.26)] blur-2xl animate-soft-pulse" />
+              <div className="relative rotate-[2deg] rounded-[2rem] border border-border bg-card p-5 shadow-[0_25px_70px_hsl(168_32%_17%/.12)] md:p-7">
+                <div className="flex items-center justify-between"><div><p className="text-xs font-bold uppercase tracking-[.14em] text-muted-foreground">Your month</p><p className="display-font mt-1 text-2xl font-semibold">September 2024</p></div><div className="grid h-10 w-10 place-items-center rounded-full bg-[hsl(var(--accent)/.35)] text-primary"><LineChart className="h-5 w-5" /></div></div>
+                <div className="mt-8 rounded-2xl bg-primary p-5 text-primary-foreground"><p className="text-xs font-semibold uppercase tracking-[.15em] text-primary-foreground/60">You kept</p><p className="display-font mt-1 text-4xl font-semibold">$2,486<span className="text-xl">.20</span></p><div className="mt-5 flex items-center justify-between border-t border-primary-foreground/15 pt-4 text-xs"><span>Net profit this month</span><span className="flex items-center gap-1 font-bold text-[hsl(var(--accent))]"><ArrowDownRight className="h-3.5 w-3.5 rotate-180" /> 18.4%</span></div></div>
+                <div className="mt-6 flex items-end gap-2.5 border-b border-border pb-5">{[38, 49, 43, 67, 58, 74, 88, 81].map((height, i) => <div key={i} className="flex-1 rounded-t-md bg-secondary transition-all hover:bg-[hsl(var(--accent))]" style={{ height: `${height}px` }} />)}</div>
+                <div className="mt-5 space-y-3"><div className="flex items-center justify-between text-sm"><span className="flex items-center gap-2 font-medium"><span className="h-2.5 w-2.5 rounded-full bg-[hsl(var(--accent))]" /> Essentials</span><span className="mono-font text-xs text-muted-foreground">$1,240</span></div><div className="flex items-center justify-between text-sm"><span className="flex items-center gap-2 font-medium"><span className="h-2.5 w-2.5 rounded-full bg-[hsl(var(--accent-foreground)/.2)]" /> Future you</span><span className="mono-font text-xs text-muted-foreground">$846</span></div></div>
+              </div>
+              <div className="absolute -bottom-6 -left-8 flex items-center gap-3 rounded-2xl border border-border bg-card px-4 py-3 shadow-xl"><div className="grid h-9 w-9 place-items-center rounded-full bg-[hsl(92_28%_49%/.16)] text-[hsl(92_28%_39%)]"><Check className="h-4 w-4" /></div><div><p className="text-xs font-bold">Nice momentum</p><p className="text-[11px] text-muted-foreground">Savings rate is up 4.8%</p></div></div>
+            </div>
+          </div>
+        </section>
+        <section className="border-y border-border bg-card/50 px-5 py-10 md:px-8"><div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-6"><p className="max-w-sm text-sm font-semibold leading-relaxed text-muted-foreground">A clearer relationship with money starts with seeing it clearly.</p><div className="flex flex-wrap gap-x-9 gap-y-3 text-xs font-bold uppercase tracking-[.13em] text-muted-foreground/75"><span className="flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-primary" /> Private by default</span><span className="flex items-center gap-2"><Leaf className="h-4 w-4 text-primary" /> No judgment here</span><span className="flex items-center gap-2"><Sparkles className="h-4 w-4 text-primary" /> Built for real life</span></div></div></section>
+        <section className="mx-auto max-w-7xl px-5 py-24 md:px-8 md:py-36"><div className="grid gap-16 md:grid-cols-[.65fr_1.35fr]"><div><p className="text-xs font-bold uppercase tracking-[.18em] text-primary">The good part</p><h2 className="display-font mt-4 max-w-md text-5xl font-semibold leading-[.95] tracking-[-.06em] md:text-6xl">Less spreadsheet. More signal.</h2></div><div className="grid gap-x-10 gap-y-12 sm:grid-cols-2"><Feature icon={CircleDollarSign} title="One gentle overview" copy="Income, expenses, and the number that matters most: what you get to keep." /><Feature icon={LineChart} title="Patterns, not panic" copy="Watch your month take shape. Spot the categories quietly asking for attention." /><Feature icon={Sparkles} title="A second perspective" copy="Ask for a plain-English summary when you want help reading between the lines." /><Feature icon={ArrowDownRight} title="Small steps count" copy="Every saved transaction is a vote for the life you are building." /></div></div></section>
+        <section className="mx-5 mb-10 overflow-hidden rounded-[2rem] bg-primary px-6 py-14 text-primary-foreground md:mx-auto md:max-w-7xl md:px-16 md:py-20"><div className="flex flex-col items-start justify-between gap-10 md:flex-row md:items-end"><div><p className="text-xs font-bold uppercase tracking-[.18em] text-primary-foreground/55">Start where you are</p><h2 className="display-font mt-4 max-w-xl text-5xl font-semibold leading-[.94] tracking-[-.055em] md:text-7xl">Your money story is worth a better home.</h2></div><Link href="/sign-up" className="group flex shrink-0 items-center gap-3 rounded-xl bg-[hsl(var(--accent))] px-5 py-3.5 text-sm font-bold text-[hsl(var(--accent-foreground))] transition-transform hover:-translate-y-1" data-testid="link-bottom-start">Make it clear <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" /></Link></div></section>
+      </main>
+      <footer className="mx-auto flex max-w-7xl items-center justify-between px-5 py-8 text-xs text-muted-foreground md:px-8"><BrandMark /><span>Made for the month ahead.</span></footer>
+    </div>
+  );
+}
+
+function Feature({ icon: Icon, title, copy }: { icon: typeof CircleDollarSign; title: string; copy: string }) {
+  return <div><div className="grid h-10 w-10 place-items-center rounded-xl bg-[hsl(var(--accent)/.28)] text-primary"><Icon className="h-5 w-5" /></div><h3 className="mt-4 text-lg font-bold">{title}</h3><p className="mt-2 max-w-xs text-sm leading-relaxed text-muted-foreground">{copy}</p></div>;
+}

@@ -1,6 +1,6 @@
-# [Project name]
+# Moneywise Finance Tracker
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+Moneywise is a secure, welcoming workspace for tracking income and expenses and understanding monthly profit, savings, and spending patterns.
 
 ## Run & Operate
 
@@ -22,23 +22,35 @@ _Replace the heading above with the project's name, and this line with one sente
 
 ## Where things live
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- `artifacts/moneywise/src/` — React dashboard, landing page, Clerk routes, and transaction flows
+- `artifacts/api-server/src/routes/finance.ts` — authenticated finance API and assistant summary logic
+- `lib/api-spec/openapi.yaml` — source-of-truth API contract
+- `lib/db/src/schema/transactions.ts` — user-scoped transaction schema
+- `artifacts/moneywise/src/index.css` — Moneywise visual tokens and responsive styling
 
 ## Architecture decisions
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
+- Clerk owns browser authentication and session cookies; the finance API requires the authenticated Clerk user ID.
+- Transactions are user-scoped directly by `userId`; no shared or global financial data is exposed.
+- New accounts receive a small starter snapshot on first dashboard/assistant access so the product explains itself immediately.
+- OpenAPI remains the single source of truth for generated React Query hooks and Zod validation.
 
 ## Product
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+- Public landing page with branded sign-in and sign-up routes
+- Monthly dashboard with total income, total expenses, net profit, savings rate, trend, and expense mix
+- Searchable, filterable transaction history with create, edit, and delete
+- Plain-language monthly Moneywise assistant summaries
+- Profile, theme preference, and logout settings
 
 ## User preferences
 
-_Populate as you build — explicit user instructions worth remembering across sessions._
+The user asked for a great UI, personal or multi-user login, income and expense capture, profit/loss totals, and a chatbot summary.
 
 ## Gotchas
 
-_Populate as you build — sharp edges, "always run X before Y" rules._
+- Run API codegen after changing `lib/api-spec/openapi.yaml`.
+- Use the artifact workflows for preview; the web app depends on `PORT` and `BASE_PATH`.
 
 ## Pointers
 

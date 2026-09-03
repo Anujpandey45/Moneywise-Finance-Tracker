@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Moneywise Finance Tracker"
+description = "A personal finance workspace for anyone to securely track income and expenses, understand monthly profit and loss, and get conversational summaries of their money habits."
+version = "1.0.0"
+id = "artifacts/moneywise"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 25823
+
+[services.development]
+run = "pnpm --filter @workspace/moneywise run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/moneywise", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/moneywise/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "25823"
+BASE_PATH = "/"
