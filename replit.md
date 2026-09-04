@@ -32,7 +32,7 @@ Moneywise is a secure, welcoming workspace for tracking income and expenses and 
 
 - Clerk owns browser authentication and session cookies; the finance API requires the authenticated Clerk user ID.
 - Transactions are user-scoped directly by `userId`; no shared or global financial data is exposed.
-- New accounts receive a small starter snapshot on first dashboard/assistant access so the product explains itself immediately.
+- New accounts start with no transaction rows and zeroed dashboard totals; all finance data is entered by the account owner.
 - OpenAPI remains the single source of truth for generated React Query hooks and Zod validation.
 
 ## Product
@@ -40,7 +40,7 @@ Moneywise is a secure, welcoming workspace for tracking income and expenses and 
 - Public landing page with branded sign-in and sign-up routes
 - Monthly dashboard with total income, total expenses, net profit, savings rate, trend, and expense mix
 - Searchable, filterable transaction history with create, edit, and delete
-- Plain-language monthly Moneywise assistant summaries
+- Plain-language monthly, weekly, spending, affordability, and savings guidance from Moneywise assistant
 - Profile, theme preference, and logout settings
 
 ## User preferences

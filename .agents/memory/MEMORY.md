@@ -1,1 +1,2 @@
 - [OpenAPI integer codegen compatibility](zod-codegen-integer.md) — generated integer validators currently conflict with the workspace's installed Zod runtime.
+- [Neon theme motion](neon-theme-motion.md) — keep interaction polish centralized in theme CSS with reduced-motion support.

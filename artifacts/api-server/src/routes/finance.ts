@@ -65,27 +65,6 @@ function toApiTransaction(transaction: typeof transactionsTable.$inferSelect) {
   };
 }
 
-async function ensureStarterData(userId: string): Promise<void> {
-  const existing = await db
-    .select({ id: transactionsTable.id })
-    .from(transactionsTable)
-    .where(eq(transactionsTable.userId, userId))
-    .limit(1);
-  if (existing.length > 0) return;
-
-  const month = currentMonth();
-  const samples = [
-    { type: "income" as const, title: "Monthly salary", category: "Salary", amount: "5200.00", date: `${month}-02`, note: "Primary income" },
-    { type: "income" as const, title: "Freelance project", category: "Freelance", amount: "860.00", date: `${month}-09`, note: "Design retainer" },
-    { type: "expense" as const, title: "Apartment rent", category: "Housing", amount: "1450.00", date: `${month}-01`, note: "Monthly rent" },
-    { type: "expense" as const, title: "Grocery run", category: "Food", amount: "186.42", date: `${month}-06`, note: null },
-    { type: "expense" as const, title: "Train pass", category: "Transport", amount: "78.00", date: `${month}-11`, note: "Monthly commute" },
-    { type: "expense" as const, title: "Streaming bundle", category: "Subscriptions", amount: "32.99", date: `${month}-14`, note: null },
-    { type: "expense" as const, title: "Dinner with friends", category: "Food", amount: "64.50", date: `${month}-18`, note: null },
-  ];
-  await db.insert(transactionsTable).values(samples.map((sample) => ({ ...sample, userId })));
-}
-
 async function getUserTransactions(userId: string, month?: string) {
   const conditions = [eq(transactionsTable.userId, userId)];
   if (month) {
@@ -279,7 +258,6 @@ router.get("/dashboard", async (req: AuthedRequest, res: Response): Promise<void
     return;
   }
   const month = parsed.data.month ?? currentMonth();
-  await ensureStarterData(req.userId!);
   const transactions = await getUserTransactions(req.userId!);
   const monthTransactions = transactions.filter((transaction) => transaction.date.startsWith(month));
   const previousMonth = shiftMonth(month, -1);
@@ -325,7 +303,6 @@ router.post("/assistant/summary", async (req: AuthedRequest, res: Response): Pro
     res.status(400).json({ error: parsed.error.message });
     return;
   }
-  await ensureStarterData(req.userId!);
   const transactions = await getUserTransactions(req.userId!, parsed.data.month);
   const response = buildAssistantResponse(parsed.data.month, transactions, parsed.data.question);
   res.json(CreateAssistantSummaryResponse.parse(response));
