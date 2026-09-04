@@ -38,41 +38,41 @@ const clerkAppearance = {
     socialButtonsVariant: 'blockButton' as const,
   },
   variables: {
-    colorPrimary: '#173d37',
-    colorForeground: '#173d37',
-    colorMutedForeground: '#62736e',
-    colorDanger: '#bd4137',
-    colorBackground: '#fbfaf6',
-    colorInput: '#f4f1e9',
-    colorInputForeground: '#173d37',
-    colorNeutral: '#d8d1c3',
+    colorPrimary: '#ff1744',
+    colorForeground: '#e8eef8',
+    colorMutedForeground: '#8a96aa',
+    colorDanger: '#ff1744',
+    colorBackground: '#0b0f19',
+    colorInput: '#111827',
+    colorInputForeground: '#e8eef8',
+    colorNeutral: '#263248',
     fontFamily: 'DM Sans, sans-serif',
-    borderRadius: '0.85rem',
+    borderRadius: '0.7rem',
   },
   elements: {
     rootBox: 'w-full flex justify-center',
-    cardBox: 'bg-[#fbfaf6] rounded-[1.5rem] w-[440px] max-w-full overflow-hidden border border-[#d8d1c3]',
+    cardBox: 'bg-[#0f1522] rounded-[1.5rem] w-[440px] max-w-full overflow-hidden border border-[#263248] shadow-[0_25px_80px_rgba(0,0,0,.35)]',
     card: '!shadow-none !border-0 !bg-transparent !rounded-none',
     footer: '!shadow-none !border-0 !bg-transparent !rounded-none',
-    headerTitle: 'text-[#173d37] font-semibold',
-    headerSubtitle: 'text-[#62736e]',
-    socialButtonsBlockButtonText: 'text-[#173d37] font-semibold',
-    formFieldLabel: 'text-[#173d37] font-semibold',
-    footerActionLink: 'text-[#173d37] font-bold',
-    footerActionText: 'text-[#62736e]',
-    dividerText: 'text-[#62736e]',
-    identityPreviewEditButton: 'text-[#173d37]',
-    formFieldSuccessText: 'text-[#496d43]',
-    alertText: 'text-[#bd4137]',
+    headerTitle: 'text-[#e8eef8] font-semibold',
+    headerSubtitle: 'text-[#8a96aa]',
+    socialButtonsBlockButtonText: 'text-[#e8eef8] font-semibold',
+    formFieldLabel: 'text-[#e8eef8] font-semibold',
+    footerActionLink: 'text-[#ff1744] font-bold',
+    footerActionText: 'text-[#8a96aa]',
+    dividerText: 'text-[#8a96aa]',
+    identityPreviewEditButton: 'text-[#00e5ff]',
+    formFieldSuccessText: 'text-[#00e5ff]',
+    alertText: 'text-[#ff1744]',
     logoBox: 'h-12',
     logoImage: 'h-11 w-11 rounded-xl',
-    socialButtonsBlockButton: 'border-[#d8d1c3] bg-[#f4f1e9] hover:bg-[#ebe5d8]',
-    formButtonPrimary: 'bg-[#173d37] text-[#fbfaf6] hover:bg-[#24544c]',
-    formFieldInput: 'border-[#d8d1c3] bg-[#f4f1e9] text-[#173d37]',
-    footerAction: 'border-t border-[#d8d1c3]',
-    dividerLine: 'bg-[#d8d1c3]',
-    alert: 'bg-[#f7e4df] border-[#e8b4aa]',
-    otpCodeFieldInput: 'border-[#d8d1c3] bg-[#f4f1e9] text-[#173d37]',
+    socialButtonsBlockButton: 'border-[#263248] bg-[#111827] hover:bg-[#172235]',
+    formButtonPrimary: 'bg-[#ff1744] text-white hover:bg-[#e3133d]',
+    formFieldInput: 'border-[#263248] bg-[#111827] text-[#e8eef8]',
+    footerAction: 'border-t border-[#263248]',
+    dividerLine: 'bg-[#263248]',
+    alert: 'bg-[#ff1744]/10 border-[#ff1744]/35',
+    otpCodeFieldInput: 'border-[#263248] bg-[#111827] text-[#e8eef8]',
     formFieldRow: 'gap-2',
     main: 'gap-5',
   },
@@ -89,11 +89,15 @@ function ProtectedPage({ children }: { children: ReactNode }) {
 }
 
 function SignInPage() {
-  return <div className="flex min-h-[100dvh] items-center justify-center bg-background px-4 py-10"><div className="absolute left-5 top-5 md:left-8 md:top-8"><Link href="/" className="text-sm font-bold text-primary" data-testid="link-auth-home">← Back to moneywise</Link></div><SignIn routing="path" path={`${basePath}/sign-in`} signUpUrl={`${basePath}/sign-up`} /></div>;
+  return <AuthFrame><SignIn routing="path" path={`${basePath}/sign-in`} signUpUrl={`${basePath}/sign-up`} /></AuthFrame>;
 }
 
 function SignUpPage() {
-  return <div className="flex min-h-[100dvh] items-center justify-center bg-background px-4 py-10"><div className="absolute left-5 top-5 md:left-8 md:top-8"><Link href="/" className="text-sm font-bold text-primary" data-testid="link-auth-home">← Back to moneywise</Link></div><SignUp routing="path" path={`${basePath}/sign-up`} signInUrl={`${basePath}/sign-in`} /></div>;
+  return <AuthFrame><SignUp routing="path" path={`${basePath}/sign-up`} signInUrl={`${basePath}/sign-in`} /></AuthFrame>;
+}
+
+function AuthFrame({ children }: { children: ReactNode }) {
+  return <div className="paper-noise relative flex min-h-[100dvh] items-center justify-center overflow-hidden bg-background px-4 py-14"><div className="money-grid absolute inset-0 opacity-50" /><div className="absolute -left-24 top-1/4 h-72 w-72 rounded-full bg-[hsl(var(--primary)/.14)] blur-3xl" /><div className="absolute -right-24 bottom-1/4 h-72 w-72 rounded-full bg-[hsl(var(--secondary)/.1)] blur-3xl" /><div className="absolute left-5 top-5 z-10 md:left-8 md:top-8"><Link href="/" className="focus-ring flex items-center gap-2 rounded-lg text-sm font-bold text-foreground transition-colors hover:text-[hsl(var(--secondary))]" data-testid="link-auth-home"><span className="grid h-7 w-7 place-items-center rounded-lg border border-[hsl(var(--primary)/.5)] bg-[hsl(var(--primary)/.12)] text-xs text-primary">MW</span> Back to moneywise</Link></div><div className="relative z-10 w-full max-w-[440px]">{children}</div></div>;
 }
 
 function ClerkQueryClientCacheInvalidator() {

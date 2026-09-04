@@ -33,14 +33,14 @@ export function TransactionDialog({ open, onOpenChange, transaction }: { open: b
   const pending = createTransaction.isPending || updateTransaction.isPending;
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-[hsl(var(--foreground)/.35)] p-0 backdrop-blur-sm sm:items-center sm:p-5" role="dialog" aria-modal="true" data-testid="dialog-transaction">
-      <div className="animate-rise-in w-full max-w-xl rounded-t-[1.5rem] border border-border bg-card p-6 shadow-2xl sm:rounded-[1.5rem] md:p-8">
+       <div className="glass-panel animate-rise-in w-full max-w-xl rounded-t-[1.5rem] border-[hsl(var(--secondary)/.35)] p-6 shadow-2xl sm:rounded-[1.5rem] md:p-8">
         <div className="flex items-start justify-between">
-          <div><p className="text-xs font-bold uppercase tracking-[0.18em] text-muted-foreground">{editing ? 'Edit line item' : 'New line item'}</p><h2 className="display-font mt-1 text-3xl font-semibold tracking-tight">{editing ? 'Tune the details' : 'Where did it go?'}</h2></div>
+           <div><p className="mono-font text-[10px] font-bold uppercase tracking-[0.18em] text-[hsl(var(--secondary))]">{editing ? 'Edit line item' : 'New line item'}</p><h2 className="display-font mt-1 text-3xl font-bold tracking-tight">{editing ? 'Tune the details' : 'Where did it go?'}</h2></div>
           <button onClick={() => onOpenChange(false)} className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground" aria-label="Close transaction form" data-testid="button-close-transaction"><X className="h-5 w-5" /></button>
         </div>
         <form onSubmit={submit} className="mt-7 space-y-5">
-          <div className="grid grid-cols-2 gap-2 rounded-xl bg-muted p-1">
-            {(['expense', 'income'] as const).map((type) => <button key={type} type="button" onClick={() => set('type', type)} className={`rounded-lg py-2.5 text-sm font-semibold capitalize transition-all ${draft.type === type ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground'}`} data-testid={`button-type-${type}`}>{type}</button>)}
+           <div className="grid grid-cols-2 gap-2 rounded-xl border border-border bg-background/70 p-1">
+             {(['expense', 'income'] as const).map((type) => <button key={type} type="button" onClick={() => set('type', type)} className={`rounded-lg py-2.5 text-sm font-semibold capitalize transition-all ${draft.type === type ? type === 'income' ? 'bg-[hsl(var(--secondary)/.15)] text-[hsl(var(--secondary))] shadow-sm' : 'bg-[hsl(var(--primary)/.15)] text-primary shadow-sm' : 'text-muted-foreground'}`} data-testid={`button-type-${type}`}>{type}</button>)}
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <label className="sm:col-span-2"><span className="field-label">Title</span><input autoFocus value={draft.title} onChange={(e) => set('title', e.target.value)} placeholder="e.g. Studio rent" className="field-input" data-testid="input-transaction-title" required /></label>
@@ -49,7 +49,7 @@ export function TransactionDialog({ open, onOpenChange, transaction }: { open: b
             <label><span className="field-label">Category</span><select value={draft.category} onChange={(e) => set('category', e.target.value)} className="field-input" data-testid="select-transaction-category">{categories.map((category) => <option key={category} value={category}>{category}</option>)}</select></label>
             <label><span className="field-label">Note <span className="font-normal normal-case tracking-normal text-muted-foreground">(optional)</span></span><input value={draft.note} onChange={(e) => set('note', e.target.value)} placeholder="Add a little context" className="field-input" data-testid="input-transaction-note" /></label>
           </div>
-          <button disabled={pending} type="submit" className="flex w-full items-center justify-center rounded-xl bg-primary py-3.5 text-sm font-bold text-primary-foreground transition-transform hover:-translate-y-0.5 disabled:opacity-60" data-testid="button-save-transaction">{pending ? 'Saving…' : editing ? 'Save changes' : 'Save transaction'}</button>
+           <button disabled={pending} type="submit" className="flex w-full items-center justify-center rounded-xl bg-primary py-3.5 text-sm font-bold text-primary-foreground shadow-[0_0_22px_hsl(var(--primary)/.2)] transition-transform hover:-translate-y-0.5 disabled:opacity-60" data-testid="button-save-transaction">{pending ? 'Saving…' : editing ? 'Save changes' : 'Save transaction'}</button>
         </form>
       </div>
     </div>

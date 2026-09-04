@@ -96,6 +96,109 @@ async function getUserTransactions(userId: string, month?: string) {
   return db.select().from(transactionsTable).where(and(...conditions)).orderBy(desc(transactionsTable.date), desc(transactionsTable.createdAt));
 }
 
+type FinanceTransaction = Awaited<ReturnType<typeof getUserTransactions>>[number];
+
+function formatAssistantMoney(amount: number): string {
+  return `$${amount.toFixed(2)}`;
+}
+
+function extractQuestionAmount(question: string): number | null {
+  const match = question.match(/(?:₹|rs\.?|inr|\$)?\s*(\d[\d,]*(?:\.\d{1,2})?)/i);
+  if (!match) return null;
+  const amount = Number(match[1].replace(/,/g, ""));
+  return Number.isFinite(amount) && amount > 0 ? amount : null;
+}
+
+function weekWindow(month: string): { start: string; end: string } {
+  const [year, monthNumber] = month.split("-").map(Number);
+  const monthEnd = new Date(Date.UTC(year, monthNumber, 0));
+  const reference = month === currentMonth() ? new Date() : monthEnd;
+  const end = new Date(Date.UTC(reference.getUTCFullYear(), reference.getUTCMonth(), reference.getUTCDate()));
+  const start = new Date(end);
+  start.setUTCDate(start.getUTCDate() - 6);
+  return { start: start.toISOString().slice(0, 10), end: end.toISOString().slice(0, 10) };
+}
+
+function sumTransactions(items: FinanceTransaction[], type: "income" | "expense"): number {
+  return items.filter((item) => item.type === type).reduce((total, item) => total + Number(item.amount), 0);
+}
+
+function buildAssistantResponse(month: string, transactions: FinanceTransaction[], rawQuestion?: string) {
+  const question = rawQuestion?.trim() ?? "";
+  const normalizedQuestion = question.toLowerCase();
+  const income = sumTransactions(transactions, "income");
+  const expenses = sumTransactions(transactions, "expense");
+  const profit = income - expenses;
+  const window = weekWindow(month);
+  const weeklyTransactions = transactions.filter((item) => item.date >= window.start && item.date <= window.end);
+  const weeklyIncome = sumTransactions(weeklyTransactions, "income");
+  const weeklyExpenses = sumTransactions(weeklyTransactions, "expense");
+  const categoryTotals = transactions
+    .filter((item) => item.type === "expense")
+    .reduce((map, item) => map.set(item.category, (map.get(item.category) ?? 0) + Number(item.amount)), new Map<string, number>());
+  const categories = [...categoryTotals.entries()].sort((a, b) => b[1] - a[1]);
+  const topCategory = categories[0];
+  const topCategoryShare = topCategory && expenses > 0 ? (topCategory[1] / expenses) * 100 : 0;
+  const amount = extractQuestionAmount(question);
+  const available = Math.max(0, profit);
+  const monthlySavingsRate = income > 0 ? (profit / income) * 100 : 0;
+  const weeklySurplus = weeklyIncome - weeklyExpenses;
+  const highlights = [
+    income > 0
+      ? `You kept ${monthlySavingsRate.toFixed(1)}% of income this month (${formatAssistantMoney(profit)}).`
+      : "Add income to see your true savings rate.",
+    `Last 7 days: ${formatAssistantMoney(weeklyExpenses)} out${weeklyIncome > 0 ? ` against ${formatAssistantMoney(weeklyIncome)} in` : ""}.`,
+    topCategory
+      ? `${topCategory[0]} is your biggest line at ${formatAssistantMoney(topCategory[1])}.`
+      : "Add a few expenses to unlock category insights.",
+  ];
+
+  let message = `For ${month}, you earned ${formatAssistantMoney(income)} and spent ${formatAssistantMoney(expenses)}, leaving a ${profit >= 0 ? "surplus" : "shortfall"} of ${formatAssistantMoney(Math.abs(profit))}.`;
+
+  if (amount !== null && /(can i|afford|spend|buy|purchase|expense|should i)/.test(normalizedQuestion)) {
+    if (profit <= 0) {
+      message = `I’d pause on a ${formatAssistantMoney(amount)} purchase for now. Your month is currently ${formatAssistantMoney(Math.abs(profit))} below break-even, so there isn’t a recorded surplus to safely spend.`;
+      highlights.unshift("Protect essentials first, then revisit this once your balance is positive.");
+    } else if (amount <= available) {
+      const afterPurchase = available - amount;
+      message = `Based on the transactions I can see, yes — ${formatAssistantMoney(amount)} fits inside your current ${formatAssistantMoney(available)} surplus. You would have about ${formatAssistantMoney(afterPurchase)} left after it.`;
+      highlights.unshift(amount > available * 0.25
+        ? "It fits, but it uses more than a quarter of your available surplus; consider waiting 24 hours."
+        : "It fits without using your full surplus. Keep your recurring bills covered before spending.");
+    } else {
+      message = `I’d hold off on ${formatAssistantMoney(amount)} today. Your recorded surplus is ${formatAssistantMoney(available)}, so this would leave the month ${formatAssistantMoney(amount - available)} beyond it.`;
+      highlights.unshift("Try a smaller version or wait until another income entry lands.");
+    }
+  } else if (/save|saving|set aside/.test(normalizedQuestion) && /week/.test(normalizedQuestion)) {
+    const suggestedWeeklySave = Math.max(0, weeklySurplus);
+    message = suggestedWeeklySave > 0
+      ? `You could set aside about ${formatAssistantMoney(suggestedWeeklySave)} from the last 7 days without going below the spending you recorded.`
+      : `The last 7 days ran ${formatAssistantMoney(Math.abs(weeklySurplus))} over income, so I wouldn’t force a savings transfer this week.`;
+    highlights.unshift(suggestedWeeklySave > 0
+      ? "Move that amount after your essential bills clear, then treat the remainder as your flexible budget."
+      : "Focus on bringing this week back to break-even before trying to save more.");
+  } else if (/overspend|over spend|too much|largest|category/.test(normalizedQuestion)) {
+    if (topCategory) {
+      message = `${topCategory[0]} is where you’re spending the most this month: ${formatAssistantMoney(topCategory[1])}, or ${topCategoryShare.toFixed(1)}% of all expenses.`;
+      highlights.unshift(topCategoryShare >= 35
+        ? `Alert: ${topCategory[0]} is taking more than a third of your spending. Set a cap before your next purchase.`
+        : `This category is leading, but it is not dominating the month. Watch the next few entries for a trend.`);
+    } else {
+      message = "There is not enough expense data to call out an overspending category yet.";
+    }
+  } else if (/week|weekly|last 7/.test(normalizedQuestion)) {
+    message = `This week you brought in ${formatAssistantMoney(weeklyIncome)} and spent ${formatAssistantMoney(weeklyExpenses)}, for a ${weeklySurplus >= 0 ? "surplus" : "shortfall"} of ${formatAssistantMoney(Math.abs(weeklySurplus))}.`;
+  } else if (question) {
+    highlights.unshift(`I used your ${month} activity to answer: “${question}”`);
+  }
+
+  if (topCategory && topCategoryShare >= 35 && !highlights.some((item) => item.startsWith("Alert:"))) {
+    highlights.push(`Alert: ${topCategory[0]} is ${topCategoryShare.toFixed(1)}% of this month's spending. A small cap there could protect your surplus.`);
+  }
+
+  return { message, highlights: highlights.slice(0, 4) };
+}
+
 router.use(requireAuth);
 
 router.get("/transactions", async (req: AuthedRequest, res: Response): Promise<void> => {
@@ -224,22 +327,7 @@ router.post("/assistant/summary", async (req: AuthedRequest, res: Response): Pro
   }
   await ensureStarterData(req.userId!);
   const transactions = await getUserTransactions(req.userId!, parsed.data.month);
-  const income = transactions.filter((item) => item.type === "income").reduce((total, item) => total + Number(item.amount), 0);
-  const expenses = transactions.filter((item) => item.type === "expense").reduce((total, item) => total + Number(item.amount), 0);
-  const profit = income - expenses;
-  const topCategory = [...transactions.filter((item) => item.type === "expense").reduce((map, item) => map.set(item.category, (map.get(item.category) ?? 0) + Number(item.amount)), new Map<string, number>())].sort((a, b) => b[1] - a[1])[0];
-  const question = parsed.data.question?.trim();
-  const message = question
-    ? `For ${parsed.data.month}, your numbers show ${profit >= 0 ? "a healthy surplus" : "a deficit"} of $${Math.abs(profit).toFixed(2)}. You earned $${income.toFixed(2)} and spent $${expenses.toFixed(2)}.`
-    : `In ${parsed.data.month}, you brought in $${income.toFixed(2)} and spent $${expenses.toFixed(2)}, leaving you with a ${profit >= 0 ? "surplus" : "shortfall"} of $${Math.abs(profit).toFixed(2)}.`;
-  const response = {
-    message,
-    highlights: [
-      profit >= 0 ? `You kept ${((profit / (income || 1)) * 100).toFixed(1)}% of your income.` : "Your spending was higher than your income this month.",
-      topCategory ? `${topCategory[0]} was your largest expense category at $${topCategory[1].toFixed(2)}.` : "Add a few expenses to unlock category insights.",
-      question ? `You asked: “${question}”` : "Ask me anything about this month's spending.",
-    ],
-  };
+  const response = buildAssistantResponse(parsed.data.month, transactions, parsed.data.question);
   res.json(CreateAssistantSummaryResponse.parse(response));
 });
 
